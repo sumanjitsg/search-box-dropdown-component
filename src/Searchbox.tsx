@@ -1,4 +1,4 @@
-import { createRef, useEffect, useRef, useState } from "react";
+import { createRef, useEffect, useState } from "react";
 
 type Props = {
   searchList: Array<any>;
@@ -22,22 +22,88 @@ export function Searchbox({ searchList }: Props) {
   const handleChange = (value: string) => {
     setValue(value);
 
-    setFilteredList(
-      searchList.filter((searchObject) =>
-        Object.values(searchObject).some((searchValue) => {
+    if (value === "") {
+      setFilteredList([]);
+    } else {
+      setFilteredList(
+        searchList.filter((searchObject) =>
+          Object.values(searchObject).some((searchValue) => {
+            if (Array.isArray(searchValue)) {
+              return searchValue.some((item) =>
+                item.toLowerCase().includes(value.toLowerCase())
+              );
+            } else if (typeof searchValue === "string") {
+              return searchValue.toLowerCase().includes(value.toLowerCase());
+            } else {
+              return false;
+            }
+          })
+        )
+      );
+    }
+  };
+
+  const highlightMatches = (object: any) => {
+    return (
+      <>
+        {Object.values(object).map((searchValue) => {
           if (Array.isArray(searchValue)) {
             return searchValue.some((item) =>
               item.toLowerCase().includes(value.toLowerCase())
-            );
+            ) === true ? (
+              <div key={"items"}>"{value}" found in items</div>
+            ) : null;
           } else if (typeof searchValue === "string") {
-            return searchValue.toLowerCase().includes(value.toLowerCase());
-          } else {
-            return false;
+            let position = 0;
+            const splitTokens = [];
+
+            while (position >= 0 && position < searchValue.length) {
+              const searchIndex = searchValue
+                .toLowerCase()
+                .indexOf(value.toLowerCase(), position);
+
+              if (searchIndex === -1) {
+                splitTokens.push({
+                  str: searchValue.substring(position),
+                  match: false,
+                });
+
+                position = searchValue.length;
+              } else {
+                splitTokens.push({
+                  str: searchValue.substring(position, searchIndex),
+                  match: false,
+                });
+                splitTokens.push({
+                  str: searchValue.substring(
+                    searchIndex,
+                    searchIndex + value.length
+                  ),
+                  match: true,
+                });
+
+                position = searchIndex + value.length;
+              }
+            }
+
+            return (
+              <div>
+                {splitTokens.map((token) => (
+                  <span className={token.match === true ? "highlight" : ""}>
+                    {token.str}
+                  </span>
+                ))}
+              </div>
+            );
           }
-        })
-      )
+        })}
+      </>
     );
   };
+
+  // useEffect(() => {
+  //   console.log(filteredList.map((item) => highlightMatches(item)));
+  // }, [filteredList]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const keyCode = e.code;
@@ -93,9 +159,7 @@ export function Searchbox({ searchList }: Props) {
             className={index === selected ? "selected" : ""}
             onMouseOver={() => handleMouseOver(index)}
           >
-            {Object.values(item).map((itemValue: any) => (
-              <div key={itemValue}>{itemValue}</div>
-            ))}
+            {highlightMatches(item)}
           </li>
         ))}
       </ul>

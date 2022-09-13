@@ -9,3 +9,7 @@ li {
 .selected {
   background-color: yellow;
 }
+
+.highlight {
+  color: blue;
+}
