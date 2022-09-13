@@ -52,7 +52,7 @@ export function Searchbox({ data, filterFn }: Props) {
     };
 
   return (
-    <div onKeyDown={onKeyDown}>
+    <div onKeyDown={onKeyDown} className="shadow-lg w-80 divide-y-2">
       <SearchInput
         onChange={onSearchInputChange}
         aria-label="Search users"
@@ -64,6 +64,7 @@ export function Searchbox({ data, filterFn }: Props) {
           selectedOption={selectedOption}
           highlightString={inputValue}
           onOptionMouseOver={onMouseOver}
+          className="overflow-y-auto bg-gray-200 max-h-96"
         />
       ) : null}
     </div>

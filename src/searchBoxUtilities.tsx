@@ -1,60 +1,134 @@
-export function highlightAllMatches(object: any, searchString: string) {
+import { v4 as uuidv4 } from "uuid";
+
+type HighlightedMatchesInStringProps = {
+  inputString: string;
+  searchString: string;
+  highlightClassName: string;
+};
+
+function HighlightedMatchesInString({
+  inputString,
+  searchString,
+  highlightClassName,
+}: HighlightedMatchesInStringProps) {
+  let position = 0;
+
+  type Token = { id: string; subString: string; matched: boolean };
+  const tokens: Token[] = [];
+
+  while (position < inputString.length) {
+    const searchIndex = inputString
+      .toLowerCase()
+      .indexOf(searchString.toLowerCase(), position);
+
+    if (searchIndex === -1) {
+      tokens.push({
+        id: uuidv4(),
+        subString: inputString.substring(position),
+        matched: false,
+      });
+
+      position = inputString.length;
+    } else {
+      tokens.push({
+        id: uuidv4(),
+        subString: inputString.substring(position, searchIndex),
+        matched: false,
+      });
+      tokens.push({
+        id: uuidv4(),
+        subString: inputString.substring(
+          searchIndex,
+          searchIndex + searchString.length
+        ),
+        matched: true,
+      });
+
+      position = searchIndex + searchString.length;
+    }
+  }
+
   return (
     <>
-      {Object.values(object).map((searchValue) => {
-        if (Array.isArray(searchValue)) {
-          return searchValue.some((item) =>
-            item.toLowerCase().includes(searchString.toLowerCase())
-          ) === true ? (
-            <div key={"array"} className="highlight">
-              "{searchString}" found in items
-            </div>
-          ) : null;
-        } else if (typeof searchValue === "string") {
-          let position = 0;
-          const splitTokens = [];
+      {tokens.map((token) => {
+        return token.matched === true ? (
+          <span key={token.id} className={highlightClassName}>
+            {token.subString}
+          </span>
+        ) : (
+          <span key={token.id}>{token.subString}</span>
+        );
+      })}
+    </>
+  );
+}
 
-          while (position >= 0 && position < searchValue.length) {
-            const searchIndex = searchValue
-              .toLowerCase()
-              .indexOf(searchString.toLowerCase(), position);
+type HighlightedMatchesInArrayProps = {
+  arrayName: string;
+  inputArray: string[];
+  searchString: string;
+  highlightClassName: string;
+};
 
-            if (searchIndex === -1) {
-              splitTokens.push({
-                str: searchValue.substring(position),
-                match: false,
-              });
+function HighlightedMatchesInArray({
+  arrayName,
+  inputArray,
+  searchString,
+  highlightClassName,
+}: HighlightedMatchesInArrayProps) {
+  console.log("highlightedmatchesinarray");
 
-              position = searchValue.length;
-            } else {
-              splitTokens.push({
-                str: searchValue.substring(position, searchIndex),
-                match: false,
-              });
-              splitTokens.push({
-                str: searchValue.substring(
-                  searchIndex,
-                  searchIndex + searchString.length
-                ),
-                match: true,
-              });
+  return inputArray.some((item) =>
+    item.toLowerCase().includes(searchString.toLowerCase())
+  ) === true ? (
+    <div className="border-y-2 py-1">
+      <span className={highlightClassName}>&#8226;</span> "{searchString}" found
+      in {arrayName}
+    </div>
+  ) : null;
+}
 
-              position = searchIndex + searchString.length;
-            }
-          }
+type User = any;
 
+const userPropertyStyles = {
+  id: "font-bold text-lg leading-none",
+  name: "font-bold italic",
+};
+
+type UserPropertyStylesKeyType = keyof typeof userPropertyStyles;
+
+function getUserPropertyStyles(key: any) {
+  return userPropertyStyles[key as UserPropertyStylesKeyType] ?? "";
+}
+
+export function renderFn(user: User, searchString: string) {
+  return (
+    <>
+      {Object.keys(user).map((key) => {
+        if (Array.isArray(user[key])) {
           return (
-            <div>
-              {splitTokens.map((token) => (
-                <span
-                  key={token.str}
-                  className={token.match === true ? "highlight" : ""}
-                >
-                  {token.str}
-                </span>
-              ))}
+            <div className={getUserPropertyStyles(key)} key={key}>
+              <HighlightedMatchesInArray
+                arrayName={key}
+                inputArray={user[key]}
+                searchString={searchString}
+                highlightClassName="text-blue-700"
+              />
             </div>
           );
+        } else if (typeof user[key] === "string") {
+          return (
+            <div className={getUserPropertyStyles(key)} key={key}>
+              <HighlightedMatchesInString
+                key={key}
+                inputString={user[key]}
+                searchString={searchString}
+                highlightClassName="text-blue-700"
+              />
+            </div>
+          );
+        } else {
+          return null;
         }
       })}
     </>

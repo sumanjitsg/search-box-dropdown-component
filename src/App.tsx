@@ -26,7 +26,7 @@ function App() {
   }, []);
 
   return (
-    <div>
+    <div className="min-h-screen flex justify-center p-4 items-start">
       <Searchbox data={users} filterFn={userObjectFilter} />
     </div>
   );

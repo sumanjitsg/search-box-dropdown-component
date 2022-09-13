@@ -1,12 +1,11 @@
 import {
-  useState,
   useEffect,
   createRef,
   ComponentPropsWithoutRef,
   MouseEventHandler,
   useRef,
 } from "react";
-import { highlightAllMatches } from "searchBoxUtilities";
+import { SearchDropdownItem } from "SearchDropdownItem";
 
 interface ULListElementProps extends ComponentPropsWithoutRef<"ul"> {}
 
@@ -35,25 +34,19 @@ export function SearchDropdown({
   }, [selectedOption]);
 
   return (
-    <ul
-      {...ulListElementProps}
-      ref={parentRef}
-      style={{
-        border: "1px solid black",
-        height: "200px",
-        overflowY: "scroll",
-      }}
-    >
+    <ul {...ulListElementProps} ref={parentRef}>
       {options.map((item, index) => (
-        <li
-          onMouseOver={onOptionMouseOver(index)}
-          ref={listRefs[index]}
+        <SearchDropdownItem
           key={item.id}
-          style={{ borderBottom: "1px solid black" }}
-          className={index === selectedOption ? "selected" : ""}
-        >
-          {highlightAllMatches(item, highlightString)}
-        </li>
+          ref={listRefs[index]}
+          item={item}
+          highlightString={highlightString}
+          className={
+            "p-4 border-b-2 space-y-2 cursor-pointer " +
+            (index === selectedOption ? "bg-yellow-200" : "bg-white")
+          }
+          onMouseOver={onOptionMouseOver(index)}
+        />
       ))}
     </ul>
   );
