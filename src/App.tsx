@@ -10,7 +10,6 @@ function App() {
     let isMounted = true;
 
     const fetchUsers = async () => {
-      // todo: try block
       const response = await fetch(USERS_URL);
       const jsonResponse = await response.json();
 
@@ -28,9 +27,36 @@ function App() {
 
   return (
     <div>
-      <Searchbox searchList={users} />
+      <Searchbox data={users} filterFn={userObjectFilter} />
     </div>
   );
+}
+
+type User = any;
+
+function userObjectFilter(user: User, searchString: string) {
+  console.log("searchString: " + searchString);
+  return Object.keys(user).some((key) => {
+    if (Array.isArray(user[key])) {
+      console.log(
+        user[key],
+        user[key].some((item: string) =>
+          item.toLowerCase().includes(searchString.toLowerCase())
+        )
+      );
+      return user[key].some((item: string) =>
+        item.toLowerCase().includes(searchString.toLowerCase())
+      );
+    } else if (typeof user[key] === "string") {
+      console.log(
+        user[key],
+        user[key].toLowerCase().includes(searchString.toLowerCase())
+      );
+      return user[key].toLowerCase().includes(searchString.toLowerCase());
+    } else {
+      return false;
+    }
+  });
 }
 
 export default App;
