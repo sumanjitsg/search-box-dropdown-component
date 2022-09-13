@@ -29,11 +29,9 @@ export function SearchDropdown({
   const listRefs = options.map((_) => createRef<HTMLLIElement>());
 
   useEffect(() => {
-    if (selectedOption !== -1) {
-      listRefs[selectedOption].current?.scrollIntoView({
-        block: "nearest",
-      });
-    }
+    listRefs[selectedOption]?.current?.scrollIntoView({
+      block: "nearest",
+    });
   }, [selectedOption]);
 
   return (

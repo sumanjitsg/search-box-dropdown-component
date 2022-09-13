@@ -58,7 +58,7 @@ export function Searchbox({ data, filterFn }: Props) {
         aria-label="Search users"
         placeholder="Search users by ID, address, name, items and pincode"
       />
-      {filteredList.length > 0 ? (
+      {inputValue !== "" ? (
         <SearchDropdown
           options={filteredList}
           selectedOption={selectedOption}
